@@ -1,0 +1,16 @@
+---
+- name: install httpd pkg
+  yum:
+    name: httpd
+    state: present
+- name: start and enable services
+  service:
+    name: httpd
+    enabled: yes
+    state: started
+- name: copy template.j2 into /var/www/html/index.html
+  template:
+    src: template.j2
+    dest: /var/www/html/index.html
+
+

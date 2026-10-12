@@ -1,0 +1,110 @@
+- name: Create partitions and mount filesystems
+  hosts: all
+  become: true
+
+  tasks:
+    - name: Check required disks
+      ansible.builtin.stat:
+        path: "/dev/{{ item }}"
+      loop:
+        - vdb
+        - vdc
+        - vdd
+      register: disk_check
+
+    - name: Display missing vdd message
+      ansible.builtin.debug:
+        msg: "Disk does not exist"
+      when:
+        - item.item == "vdd"
+        - not item.stat.exists
+      loop: "{{ disk_check.results }}"
+
+    - name: Create partition on vdb with fallback
+      when: disk_check.results[0].stat.exists
+      block:
+        - name: Create 1500 MiB partition on vdb
+          community.general.parted:
+            device: /dev/vdb
+            number: 1
+            label: gpt
+            state: present
+            part_start: 1MiB
+            part_end: 1501MiB
+
+      rescue:
+        - name: Display partition size error for vdb
+          ansible.builtin.debug:
+            msg: "Could not create partition of that size"
+
+        - name: Create 800 MiB partition on vdb
+          community.general.parted:
+            device: /dev/vdb
+            number: 1
+            label: gpt
+            state: present
+            part_start: 1MiB
+            part_end: 801MiB
+
+    - name: Create partition on vdc with fallback
+      when: disk_check.results[1].stat.exists
+      block:
+        - name: Create 1500 MiB partition on vdc
+          community.general.parted:
+            device: /dev/vdc
+            number: 1
+            label: gpt
+            state: present
+            part_start: 1MiB
+            part_end: 1501MiB
+
+      rescue:
+        - name: Display partition size error for vdc
+          ansible.builtin.debug:
+            msg: "Could not create partition of that size"
+
+        - name: Create 800 MiB partition on vdc
+          community.general.parted:
+            device: /dev/vdc
+            number: 1
+            label: gpt
+            state: present
+            part_start: 1MiB
+            part_end: 801MiB
+
+    - name: Format vdb partition
+      community.general.filesystem:
+        fstype: ext4
+        dev: /dev/vdb1
+      when: disk_check.results[0].stat.exists
+
+    - name: Format vdc partition
+      community.general.filesystem:
+        fstype: ext4
+        dev: /dev/vdc1
+      when: disk_check.results[1].stat.exists
+
+    - name: Create mount points
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: directory
+      loop:
+        - /newpart
+        - /newpart1
+
+    - name: Mount vdb partition persistently
+      ansible.posix.mount:
+        path: /newpart
+        src: /dev/vdb1
+        fstype: ext4
+        state: mounted
+      when: disk_check.results[0].stat.exists
+
+    - name: Mount vdc partition persistently
+      ansible.posix.mount:
+        path: /newpart1
+        src: /dev/vdc1
+        fstype: ext4
+        state: mounted
+      when: disk_check.results[1].stat.exists
+

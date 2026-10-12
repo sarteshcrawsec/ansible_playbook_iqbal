@@ -1,0 +1,40 @@
+- name: create a users and groups wth secure password
+  hosts: dev  test
+  vars_files:
+    - lock.yml
+    - user_list.yml
+  tasks:
+    - name: create group on dev
+      group:
+        name: devops
+        state: present
+    - name: create users and add it on devops groups
+      user:
+        name: "{{ item.name }}"
+        uid: "{{ item.uid }}"
+        groups: devops
+        password_expire_max: 30
+        password: "{{ pw_developer | password_hash('sha512') }}"
+      when: item.job == 'developer'
+      loop: "{{ users }}"
+
+- name: create a users and groups wth secure password
+  hosts: prod
+  vars_files:
+    - lock.yml
+    - user_list.yml
+  tasks:
+    - name: create group on prod
+      group:
+        name: opsmgr
+        state: present
+    - name: create users and add it on opsmgr groups
+      user:
+        name: "{{ item.name }}"
+        uid: "{{ item.uid }}"
+        groups: opsmgr
+        password_expire_max: 30
+        password: "{{ pw_manager | password_hash('sha512') }}"
+      when: item.job == 'manager'
+      loop: "{{ users }}"
+

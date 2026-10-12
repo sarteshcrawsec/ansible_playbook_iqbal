@@ -1,0 +1,29 @@
+- hosts: all
+  become: yes
+  tasks:
+    - name: Import GPG key
+      ansible.builtin.rpm_key:
+        key: http://content.example.com/rhel10.0/x86_64/dvd/RPM-GPG-KEY-redhat-release
+        state: present
+
+    - name: Add BasOS repo
+      ansible.builtin.yum_repository:
+        name: BaseOS
+        description: Basos
+        file: myrepo
+        baseurl: http://content.example.com/rhel10.0/x86_64/dvd/BaseOS/
+        enabled: true
+        gpgcheck: true
+        gpgkey: http://content.example.com/rhel10.0/x86_64/dvd/RPM-GPG-KEY-redhat-release
+        state: present
+    - name: Add AppStream repo
+      ansible.builtin.yum_repository:
+        name: AppStream
+        description: AppStream
+        file: myrepo
+        baseurl: http://content.example.com/rhel10.0/x86_64/dvd/AppStream/
+        enabled: true
+        gpgcheck: true
+        gpgkey: http://content.example.com/rhel10.0/x86_64/dvd/RPM-GPG-KEY-redhat-release
+        state: present
+

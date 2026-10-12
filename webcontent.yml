@@ -1,0 +1,25 @@
+- hosts: dev
+  tasks:
+
+    - name: create a group
+      group:
+        name: webdev
+        state: present
+    - name: create a webdev directory
+      file:
+        path: /webdev
+        mode: 2775
+        group: webdev
+        state: directory
+    - name: create a soft link
+      file:
+        src: /webdev
+        dest: /var/www/html/webdev
+        state: link
+    - name: create index.html
+      copy:
+        content: "Development\n"
+        dest: /webdev/index.html
+    - name: change selinux context
+      shell: chcon -R -t httpd_sys_content_t /webdev
+

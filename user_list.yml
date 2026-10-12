@@ -1,0 +1,14 @@
+users:
+  - name: bill
+    uid: 2000
+    job: developer
+  - name: chris
+    job: manager
+    uid: 3000
+  - name: dave
+    job: test
+    uid: 4000
+  - name: ethan
+    job: developer
+    uid: 5000
+

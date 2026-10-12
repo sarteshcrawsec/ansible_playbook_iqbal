@@ -1,0 +1,75 @@
+- hosts: webservers
+  become: yes
+  tasks:
+    - name: create 1500M Partition with vdb
+      block:
+        - name: create partition
+          parted:
+            device:
+            number: 1
+            part_type: primary
+            part_start: 1MiB
+            part_end: 1501MiB
+      rescue:
+        - name: Display error msg 
+          debug:
+            msg: "codnot create partition of that size"
+        - name: create 800M fallback partition
+          parted:
+            device:
+            number: 1
+            part_type: primary
+            part_start: 1MiB
+            part_end: 801MiB
+        - name: format partition with ext3
+          filesystem:
+            dev: /dev/vdb1
+            fstype: ext3
+        - name: mount the vdb1 partition on /newpart
+          mount:
+            path: /newpart
+            src: /dev/vdb1
+            fstype: ext3
+            opts: default
+            state: mounted
+            
+    - name: create 1500M Partition with vdc
+      block:
+        - name: create partition
+          parted:
+            device:
+            number: 1
+            part_type: primary
+            part_start: 1MiB
+            part_end: 1501MiB
+      rescue:
+        - name: Display error msg 
+          debug:
+            msg: "codnot create partition of that size"
+        - name: create 800M fallback partition
+          parted:
+            device:
+            number: 1
+            part_type: primary
+            part_start: 1MiB
+            part_end: 801MiB
+        - name: format partition with ext3
+          filesystem:
+            dev: /dev/vdc1
+            fstype: ext3
+        - name: mount the vdb1 partition on /newpart
+          mount:
+            path: /newpart1
+            src: /dev/vdb1
+            fstype: ext3
+            opts: default
+            state: mounted
+        - name: check /dev/vdd
+          stat:
+            path: /dev/vdd
+          register: vdd
+        - name: Display missing the disk msg
+          debug:
+            msg: "disk don,t exits"
+          when: not vdd.stat.exits
+

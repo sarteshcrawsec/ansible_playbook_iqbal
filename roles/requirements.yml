@@ -1,0 +1,5 @@
+- src: https://github.com/RedHatRanger/phpinfo.git
+  name: phpinfo
+
+- src: https://github.com/RedHatRanger/balancer.git
+  name: balancer

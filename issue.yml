@@ -1,0 +1,18 @@
+- hosts: all
+  tasks:
+    - name: update the content on dev vms
+      copy:
+        content: "Development\n"
+        dest: /etc/issue
+      when: inventory_hostname in groups['dev']
+    - name: update the content on test vms
+      copy:
+        content: "Test\n"
+        dest: /etc/issue
+      when: inventory_hostname in groups['test']
+    - name: update the content on prod vms
+      copy:
+        content: "Production\n"
+        dest: /etc/issue
+      when: inventory_hostname in groups['prod']
+

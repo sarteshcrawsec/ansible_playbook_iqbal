@@ -1,0 +1,8 @@
+- hosts: all
+  vars:
+    timesync_ntp_servers:
+      - hostname: 172.25.250.9
+        iburst: yes
+  roles:
+    - redhat.rhel_system_roles.timesync
+

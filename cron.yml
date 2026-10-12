@@ -1,0 +1,9 @@
+- hosts: all
+  tasks:
+    - name: setup cronjob for user greg every 2 minute "logger 'EX294 in progress'"
+      ansible.builtin.cron:
+        name: cron job set for greg user
+        user: greg
+        minute: "*/2"
+        job: 'logger "EX294 in prigress"'
+

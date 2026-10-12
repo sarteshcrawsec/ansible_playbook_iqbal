@@ -1,0 +1,13 @@
+- hosts: all
+  tasks:
+    - block:
+        - name: copy file1
+          template:
+            src: /home/desktop/git/ansible_playbook/hwreport.txt
+            dest: /root/hwreport.txt
+      rescue:
+        - name: copy  file2
+          template:
+            src: /home/desktop/git/ansible_playbook/hwreport.txt2
+            dest: /root/hwreport.txt
+

@@ -1,0 +1,7 @@
+- hosts: webservers
+  roles:
+    - apache
+  post_tasks:
+    - shell: firewall-cmd --permanent --add-service=http
+    - shell: firewall-cmd --reload
+

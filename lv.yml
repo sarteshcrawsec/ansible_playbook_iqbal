@@ -1,0 +1,40 @@
+- name: Create logical volume
+  hosts: all
+  become: true
+  tasks:
+    - name: Check research volume group
+      ansible.builtin.command:
+        cmd: vgs research
+      register: vg_check
+      changed_when: false
+      failed_when: false
+    - name: Show VG missing message
+      ansible.builtin.debug:
+        msg: "volume group does not exist"
+      when: vg_check.rc != 0
+    - name: Create 1500 MiB LV
+      block:
+        - name: Create data LV with 1500 MiB
+          community.general.lvol:
+            vg: research
+            lv: data
+            size: 1500m
+            state: present
+      rescue:
+        - name: Show LV size error
+          ansible.builtin.debug:
+            msg: "Could not create logical volume of that size"
+
+        - name: Create data LV with 800 MiB
+          community.general.lvol:
+            vg: research
+            lv: data
+            size: 800m
+            state: present
+      when: vg_check.rc == 0
+    - name: Format logical volume with ext4
+      ansible.builtin.filesystem:
+        fstype: ext4
+        dev: /dev/research/data
+      when: vg_check.rc == 0
+
